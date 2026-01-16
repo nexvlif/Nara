@@ -1,10 +1,11 @@
 from services.groq_client import GroqClient
 from core.persona import NARA_PERSONLITY
+from core.types import ChatMessage
 
 class ChatSession:
   def __init__(self):
     self.groq = GroqClient()
-    self.messages = [
+    self.messages: list[ChatMessage] = [
       {"role": "system", "content": NARA_PERSONLITY}
     ]
   
