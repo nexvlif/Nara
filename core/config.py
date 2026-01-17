@@ -8,4 +8,6 @@ model_name = "llama-3.3-70b-versatile"
 
 
 temperature = 0.7
-max_tokens = 1024
+max_tokens = 200
+
+tts_mode = "edge" #hf #off
