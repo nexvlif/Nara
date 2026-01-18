@@ -33,6 +33,9 @@ class TTSService:
         )
 
         _, gradio_audio_path = result
+        if not gradio_audio_path:
+          raise RuntimeError("No audio file returned from TTS service")
+        
         local_path = AUDIO_DIR / f"nara_{uuid.uuid4().hex}.wav"
         shutil.copy(gradio_audio_path, local_path)
         return str(local_path)
