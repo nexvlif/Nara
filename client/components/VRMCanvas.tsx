@@ -7,9 +7,10 @@ import { VRMController } from "@/lib/VRMController"
 
 interface VRMCanvasProps {
   onControllerReady?: (controller: VRMController) => void;
+  faceTrackingEnabled?: boolean;
 }
 
-export default function VRMCanvas({ onControllerReady }: VRMCanvasProps) {
+export default function VRMCanvas({ onControllerReady, faceTrackingEnabled }: VRMCanvasProps) {
   return (
     <Canvas camera={{ position: [0, 1.5, 1.2], fov: 25 }}>
       <ambientLight intensity={0.8} />

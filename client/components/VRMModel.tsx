@@ -14,8 +14,12 @@ export default function VRMModel({ onControllerReady }: VRMModelProps) {
   const { scene } = useThree();
   const vrmRef = useRef<VRM | null>(null);
   const controllerRef = useRef<VRMController | null>(null);
+  const loadedRef = useRef(false);
 
   useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
+
     const loader = new GLTFLoader();
     loader.register((parser) => new VRMLoaderPlugin(parser));
 
@@ -23,7 +27,12 @@ export default function VRMModel({ onControllerReady }: VRMModelProps) {
 
     loader.load(
       "/vrm/Nara.vrm",
-      (gltf) => {
+      async (gltf) => {
+        if (vrmRef.current) {
+          scene.remove(vrmRef.current.scene);
+          VRMUtils.deepDispose(vrmRef.current.scene);
+        }
+
         const vrm = gltf.userData.vrm as VRM;
         console.log("VRM model loaded:", vrm);
         scene.add(vrm.scene);
@@ -31,9 +40,9 @@ export default function VRMModel({ onControllerReady }: VRMModelProps) {
 
         VRMUtils.rotateVRM0(vrm);
 
-        // Create controller
         const controller = new VRMController(vrm);
         controllerRef.current = controller;
+
         onControllerReady?.(controller);
       },
       (progress) => {
@@ -55,9 +64,8 @@ export default function VRMModel({ onControllerReady }: VRMModelProps) {
         controllerRef.current = null;
       }
     };
-  }, [scene, onControllerReady]);
+  }, [scene]);
 
-  // Update controller every frame
   useFrame((_, delta) => {
     controllerRef.current?.update(delta);
   });
