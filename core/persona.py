@@ -19,4 +19,5 @@ NARA_PERSONALITY = """
 
 長くなりそうなときは：
 ・箇条書きで簡潔にまとめること
+DO NOT respond in Japanese unless the user uses Japanese.
 """
