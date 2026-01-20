@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VRM, VRMLoaderPlugin, VRMUtils } from "@pixiv/three-vrm";
-import { useThree } from "@react-three/fiber";
+import { useThree, useFrame } from "@react-three/fiber";
+import { VRMController } from "@/lib/VRMController";
 
+interface VRMModelProps {
+  onControllerReady?: (controller: VRMController) => void;
+}
 
-export default function VRMModel() {
+export default function VRMModel({ onControllerReady }: VRMModelProps) {
   const { scene } = useThree();
   const vrmRef = useRef<VRM | null>(null);
+  const controllerRef = useRef<VRMController | null>(null);
 
   useEffect(() => {
     const loader = new GLTFLoader();
@@ -26,6 +30,11 @@ export default function VRMModel() {
         vrmRef.current = vrm;
 
         VRMUtils.rotateVRM0(vrm);
+
+        // Create controller
+        const controller = new VRMController(vrm);
+        controllerRef.current = controller;
+        onControllerReady?.(controller);
       },
       (progress) => {
         console.log(
@@ -41,14 +50,17 @@ export default function VRMModel() {
     return () => {
       if (vrmRef.current) {
         scene.remove(vrmRef.current.scene);
-
         VRMUtils.deepDispose(vrmRef.current.scene);
-
         vrmRef.current = null;
+        controllerRef.current = null;
       }
     };
-  }, [scene]);
+  }, [scene, onControllerReady]);
+
+  // Update controller every frame
+  useFrame((_, delta) => {
+    controllerRef.current?.update(delta);
+  });
 
   return null;
 }
-

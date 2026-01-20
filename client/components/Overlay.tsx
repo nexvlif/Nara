@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Battery, BatteryCharging, Wifi, Settings, Signal, Twitter, Mic, MicOff, Camera } from "lucide-react";
+import { Battery, BatteryCharging, Wifi, Settings, Signal, Twitter, Github, Mic, MicOff, Camera } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import MusicPlayer from "./MusicPlayer";
@@ -71,7 +71,9 @@ export default function Overlay() {
                 >
                     <div className="flex items-center gap-2 bg-black/20 backdrop-blur-xl rounded-full px-3 py-1.5 border border-white/5 text-white/80">
                         <Twitter className="w-3 h-3" />
-                        <span className="text-[10px] font-medium">@Nara_AI</span>
+                        <span className="text-[10px] font-medium">@nexvlif</span>
+                        <Github className="w-3 h-3" />
+                        <span className="text-[10px] font-medium">@nexvlif</span>
                     </div>
 
                     <div className="flex items-center gap-2 bg-black/20 backdrop-blur-xl rounded-full px-3 py-1.5 border border-white/5 text-white/80">

@@ -1,15 +1,54 @@
 "use client";
 
+import { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import ChatUI from "@/components/ChatUI";
 import Overlay from "@/components/Overlay";
+import SubtitleDisplay from "@/components/SubtitleDisplay";
+import { playWithLipSync } from "@/lib/audio";
+import { VRMController } from "@/lib/VRMController";
 
 const VRMCanvas = dynamic(
   () => import("@/components/VRMCanvas"),
   { ssr: false }
 );
 
+interface ChatResponse {
+  text: string;
+  audio_url: string | null;
+}
+
 export default function Home() {
+  const [subtitle, setSubtitle] = useState("");
+  const [isSubtitleVisible, setIsSubtitleVisible] = useState(false);
+  const vrmControllerRef = useRef<VRMController | null>(null);
+
+  const handleControllerReady = useCallback((controller: VRMController) => {
+    vrmControllerRef.current = controller;
+    console.log("VRM Controller ready!");
+  }, []);
+
+  const handleResponse = useCallback((response: ChatResponse) => {
+    setSubtitle(response.text);
+    setIsSubtitleVisible(true);
+
+    if (response.audio_url) {
+      const audioUrl = `http://localhost:8000${response.audio_url}`;
+      playWithLipSync(audioUrl, (volume) => {
+        vrmControllerRef.current?.setLipSync(volume);
+      });
+
+      const duration = Math.max(5000, response.text.length * 80);
+      setTimeout(() => {
+        setIsSubtitleVisible(false);
+      }, duration);
+    } else {
+      setTimeout(() => {
+        setIsSubtitleVisible(false);
+      }, 4000);
+    }
+  }, []);
+
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-zinc-950 text-white selection:bg-pink-500/30">
       <div className="absolute inset-0 z-0">
@@ -19,14 +58,16 @@ export default function Home() {
       </div>
 
       <div className="absolute inset-0 z-10">
-        <VRMCanvas />
+        <VRMCanvas onControllerReady={handleControllerReady} />
       </div>
+
+      <SubtitleDisplay text={subtitle} isVisible={isSubtitleVisible} />
 
       <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-0">
         <Overlay />
         <div className="flex-1" />
         <div className="pointer-events-auto w-full max-w-2xl mx-auto p-6 md:p-12">
-          <ChatUI />
+          <ChatUI onResponse={handleResponse} />
         </div>
       </div>
     </main>

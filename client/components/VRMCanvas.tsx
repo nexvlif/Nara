@@ -3,14 +3,18 @@
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import VRMModel from "@/components/VRMModel"
-import { AmbientLight } from "three"
+import { VRMController } from "@/lib/VRMController"
 
-export default function VRMCanvas() {
+interface VRMCanvasProps {
+  onControllerReady?: (controller: VRMController) => void;
+}
+
+export default function VRMCanvas({ onControllerReady }: VRMCanvasProps) {
   return (
     <Canvas camera={{ position: [0, 1.5, 1.2], fov: 25 }}>
       <ambientLight intensity={0.8} />
       <directionalLight position={[1, 1, 1]} />
-      <VRMModel />
+      <VRMModel onControllerReady={onControllerReady} />
       <OrbitControls
         target={[0, 1.4, 0]}
         enablePan={false}

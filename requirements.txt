@@ -3,3 +3,6 @@ edge_tts==7.2.7
 gradio_client==2.0.3
 groq==1.0.0
 python-dotenv==1.2.1
+fastapi==0.115.0
+uvicorn==0.30.0
+python-multipart==0.0.9

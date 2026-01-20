@@ -6,7 +6,16 @@ import { Send, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-export default function ChatUI() {
+interface ChatResponse {
+  text: string;
+  audio_url: string | null;
+}
+
+interface ChatUIProps {
+  onResponse?: (response: ChatResponse) => void;
+}
+
+export default function ChatUI({ onResponse }: ChatUIProps) {
   const [text, setText] = useState("");
   const [isSending, setIsSending] = useState(false);
 
@@ -15,11 +24,16 @@ export default function ChatUI() {
 
     setIsSending(true);
     try {
-      await fetch("#url", {
+      const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text })
       });
+
+      if (!res.ok) throw new Error("Failed to send message");
+
+      const data: ChatResponse = await res.json();
+      onResponse?.(data);
       setText("");
     } catch (e) {
       console.error("Failed to send message", e);
@@ -80,3 +94,4 @@ export default function ChatUI() {
     </motion.div>
   );
 }
+

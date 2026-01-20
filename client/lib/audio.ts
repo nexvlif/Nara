@@ -1,25 +1,51 @@
-export function playWithLipSync(
+export async function playWithLipSync(
   audioUrl: string,
   onVolume: (v: number) => void
-) {
-  const audio = new Audio(audioUrl);
-  const ctx = new AudioContext();
-  const source = ctx.createMediaElementSource(audio);
-  const analyzer = ctx.createAnalyser();
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const audio = new Audio(audioUrl);
+    audio.crossOrigin = "anonymous";
 
-  source.connect(analyzer);
-  analyzer.connect(ctx.destination);
+    audio.addEventListener("canplaythrough", async () => {
+      try {
+        const ctx = new AudioContext();
 
-  const data = new Uint8Array(analyzer.frequencyBinCount);
+        if (ctx.state === "suspended") {
+          await ctx.resume();
+        }
 
-  function tick() {
-    analyzer.getByteFrequencyData(data);
-    const volume = data.reduce((a, b) => a + b, 0) / data.length;
-    onVolume(volume / 256);
-    requestAnimationFrame(tick);
-  }
+        const source = ctx.createMediaElementSource(audio);
+        const analyzer = ctx.createAnalyser();
 
-  audio.play();
-  tick();
+        source.connect(analyzer);
+        analyzer.connect(ctx.destination);
 
+        const data = new Uint8Array(analyzer.frequencyBinCount);
+
+        function tick() {
+          if (audio.paused || audio.ended) {
+            resolve();
+            return;
+          }
+          analyzer.getByteFrequencyData(data);
+          const volume = data.reduce((a, b) => a + b, 0) / data.length;
+          onVolume(volume / 256);
+          requestAnimationFrame(tick);
+        }
+
+        await audio.play();
+        tick();
+      } catch (err) {
+        console.error("Audio playback error:", err);
+        reject(err);
+      }
+    });
+
+    audio.addEventListener("error", (e) => {
+      console.error("Audio load error:", e);
+      reject(e);
+    });
+
+    audio.load();
+  });
 }
